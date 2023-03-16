@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+     "$basetexture" "models\shaky\fleshlight/light_off"
+     $color2 "[.25 .25 .25]"
+}

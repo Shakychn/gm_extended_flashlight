@@ -1,0 +1,26 @@
+"VertexLitGeneric"
+{
+     "$basetexture" "models\shaky\fleshlight/flashlight"
+     "$bumpmap" "models\shaky\fleshlight/flashlight_n"
+     "$ambientocclusiontexture" "models\shaky\fleshlight/flashlight_ao"
+     $nocull 1 
+     $normalmapalphaenvmapmask 1
+
+     $color2 "[.85 .85 .85]"
+                                   
+     "$phong" "1"                            
+     "$phongboost"  "0.5"        
+     "$phongexponenttexture" "models\shaky\fleshlight/phongwarp_metal"
+
+     $ambientocclusion 1
+
+          
+     $lightwarptexture "models\shaky\fleshlight/lightwarp_metallic"
+     
+//   "$phongfresnelranges"    "[0.8 2 10.5]"           
+     "$phongtint"             "[1 1 1.1]"              
+
+     "$rimmask" "1"
+     "$rimlightboost" "5"     
+     "$rimexponent" "0.1"
+}

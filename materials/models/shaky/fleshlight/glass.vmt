@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+     "$basetexture" "models\shaky\fleshlight/flashlight"
+     "$bumpmap" "models\shaky\fleshlight/flashlight_n"
+     "$selfillum" 1
+}
