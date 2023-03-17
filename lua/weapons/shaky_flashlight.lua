@@ -32,7 +32,7 @@ SWEP.Secondary.Ammo = "none"
 
 SWEP.DrawAmmo = false
 
-SWEP.ViewModel	= "models/shaky/weapons/flashlight/v_flashlight.mdl"
+SWEP.ViewModel	= "models/shaky/weapons/flashlight/c_flashlight.mdl"
 SWEP.WorldModel	= "models/shaky/weapons/flashlight/w_flashlight.mdl"
 if CLIENT then
 	SWEP.WepSelectIcon = surface.GetTextureID( "vgui/shaky_flashlight" )
@@ -112,6 +112,8 @@ function SWEP:Deploy()
 
 		end)
 	--end
+
+	return true
 end
 
 function SWEP:ToggleLight()
@@ -131,9 +133,6 @@ function SWEP:ToggleLight()
 end
 
 function SWEP:Reload()
-	if CLIENT then
-		print(self.light)
-	end
 end
 
 function SWEP:PrimaryAttack()

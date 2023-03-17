@@ -21,13 +21,44 @@ list.Set("LampTextures", "models/shaky/fleshlight/flashlight001", {
 
 if CLIENT then
 
+
 	hook.Add( "AddToolMenuCategories", "shaky_flashlight_category", function()
-		spawnmenu.AddToolCategory( "Utilities", "shakyflashlight", "Shaky's Flahslight" )
+		spawnmenu.AddToolCategory( "Utilities", "shakyflashlight", "Shaky's Flashlight" )
 	end )
 
 	hook.Add( "PopulateToolMenu", "shaky_flashlight_settungs", function()
 		spawnmenu.AddToolMenuOption( "Utilities", "shakyflashlight", "settings", "Settings", "", "", function( panel )
 			panel:ClearControls()
+
+			local botun = panel:Button("Reset", "nuthing")
+
+			local convars_to_reset = {
+				["shaky_flashlight_material"] = "models/shaky/fleshlight/flashlight001",
+				["shaky_flashlight_fov"] = 55,
+				["shaky_flashlight_farz"] = 2555,
+				["shaky_flashlight_brightness"] = 1,
+				["shaky_flashlight_flickerlight"] = 1,
+				["shaky_flashlight_dynamiclight"] = 1,
+				["shaky_flashlight_flickintervalmin"] = 25,
+				["shaky_flashlight_flickintervalmax"] = 45,
+				["shaky_flashlight_flicksize"] = 0.8,
+				["shaky_flashlight_animatecamera"] = 1,
+				["shaky_flashlight_lightfollowcenter"] = 0,
+				["shaky_flashlight_animspeed"] = 35,
+				["shaky_flashlight_r"] = 255,
+				["shaky_flashlight_g"] = 255,
+				["shaky_flashlight_b"] = 255,
+			}
+
+			botun.DoClick = function(self)
+
+				for cmd, val in pairs(convars_to_reset) do
+							
+					RunConsoleCommand(cmd, val)
+
+				end
+
+			end
 
 			panel:CheckBox( "Animate Camera", "shaky_flashlight_animatecamera" ):SetValue(GetConVar("shaky_flashlight_animatecamera"):GetBool())	
 
