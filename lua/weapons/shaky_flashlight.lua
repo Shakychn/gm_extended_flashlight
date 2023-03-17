@@ -4,7 +4,7 @@ AddCSLuaFile()
 SWEP.PrintName = "Flashlight"
 SWEP.Author = "Shaky"
 SWEP.Purpose = "make u see things :)"
-SWEP.Instructions = 'LMB - Toggle light'
+SWEP.Instructions = 'LMB - Toggle light, RMB - attack (hold to charge), R - Cancel punch'
 
 SWEP.Slot = 0
 SWEP.SlotPos = 4
@@ -37,6 +37,42 @@ SWEP.WorldModel	= "models/shaky/weapons/flashlight/w_flashlight.mdl"
 if CLIENT then
 	SWEP.WepSelectIcon = surface.GetTextureID( "vgui/shaky_flashlight" )
 end
+
+sound.Add( {
+	name = "shaky_flashlight_lean",
+	channel = CHAN_WEAPON,
+	volume = 1.0,
+	level = 40,
+	pitch = {110, 120},
+	sound = {"shaky_flashlight/lean_1.wav", "shaky_flashlight/lean_2.wav", "shaky_flashlight/lean_3.wav", "shaky_flashlight/lean_4.wav"}
+} )
+
+sound.Add( {
+	name = "shaky_flashlight_swing",
+	channel = CHAN_WEAPON,
+	volume = 1.0,
+	level = 80,
+	pitch = {120, 130},
+	sound = {"shaky_flashlight/swing_1.wav", "shaky_flashlight/swing_2.wav", "shaky_flashlight/swing_3.wav", "shaky_flashlight/swing_4.wav"}
+} )
+
+sound.Add( {
+	name = "shaky_flashlight_lean_cancel",
+	channel = CHAN_WEAPON,
+	volume = 1.0,
+	level = 40,
+	pitch = {70, 80},
+	sound = {"shaky_flashlight/lean_1.wav", "shaky_flashlight/lean_2.wav", "shaky_flashlight/lean_3.wav", "shaky_flashlight/lean_4.wav"}
+} )
+
+sound.Add( {
+	name = "shaky_flashlight_hit",
+	channel = CHAN_WEAPON,
+	volume = 2.0,
+	level = 100,
+	pitch = {100, 100},
+	sound = {"shaky_flashlight/hit.wav"}
+} )
 
 SWEP.UseHands = true
 
@@ -133,6 +169,15 @@ function SWEP:ToggleLight()
 end
 
 function SWEP:Reload()
+	if game.SinglePlayer() then self:CallOnClient("Reload") end
+	if self.beginattack then
+		self:EmitSound("shaky_flashlight_lean_cancel")
+		self.NextIdle = CurTime() + 1
+		self.IdlePlay = false
+		self:SendWeaponAnim(ACT_VM_RELEASE)
+		self:SetNextSecondaryFire(CurTime() + 1)
+		self.beginattack = false
+	end
 end
 
 function SWEP:PrimaryAttack()
@@ -142,6 +187,7 @@ function SWEP:PrimaryAttack()
 	self.IsRunning = false
 	self:SendWeaponAnim(ACT_VM_RELOAD)
 	self:SetNextPrimaryFire(CurTime() + 1)
+	self:SetNextSecondaryFire(CurTime() + 1)
 
 	timer.Create("createlight"..self:EntIndex(), 0.28, 1, function()
 
@@ -154,6 +200,17 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
+	if game.SinglePlayer() then self:CallOnClient("SecondaryAttack") end
+	self:SetNextSecondaryFire(CurTime() + 1)
+	if !self.beginattack then
+		self:EmitSound("shaky_flashlight_lean")
+		self.NextIdle = CurTime() + 0.5
+		self.IdlePlay = false
+		self.IsRunning = false
+		self.beginattack = true
+		self.startedcharging = false
+		self:SendWeaponAnim(ACT_VM_PICKUP)
+	end
 end
 
 local flicknext = 0
@@ -183,18 +240,74 @@ function SWEP:Think()
 
 	local vm = self.Owner:GetViewModel()
 
-	if self.Owner:GetVelocity():Length2DSqr() > 4555 and ( self.NextIdle <= CurTime() or self.IdlePlay ) then
-		self.IdlePlay = false
-		if self.Owner:IsSprinting() then
-			self:SetNextPrimaryFire(CurTime() + 0.1)
-			vm:SetSequence("run")
-		else
-			vm:SetSequence("walk")
+	if !self.beginattack then
+		if self.Owner:GetVelocity():Length2DSqr() > 4555 and ( self.NextIdle <= CurTime() or self.IdlePlay ) then
+			self.IdlePlay = false
+			if self.Owner:IsSprinting() then
+				self:SetNextPrimaryFire(CurTime() + 0.1)
+				vm:SetSequence("run")
+			else
+				vm:SetSequence("walk")
+			end
 		end
-	end
-	if self.NextIdle <= CurTime() and !self.IdlePlay and ( !self.Owner:IsOnGround() or self.Owner:GetVelocity():Length2DSqr() < 4555 ) then
-		self:SendWeaponAnim(ACT_VM_IDLE)
-		self.IdlePlay = true
+		if self.NextIdle <= CurTime() and !self.IdlePlay and ( !self.Owner:IsOnGround() or self.Owner:GetVelocity():Length2DSqr() < 4555 ) then
+			self:SendWeaponAnim(ACT_VM_IDLE)
+			self.IdlePlay = true
+		end
+	else
+		if !self.startedcharging and vm:GetSequenceName(vm:GetSequence()) == "attack_prepare" then
+			self.startedcharging = true
+			self:SetPlaybackRate(0)
+			self.chargerate = 0
+			self.multiplier = 30
+		end
+		print(self.chargerate)
+		self.multiplier = math.Approach(self.multiplier, 1, FrameTime()*4)
+		self.chargerate = math.Approach(self.chargerate, 1, FrameTime()/self.multiplier)
+
+		if self.NextIdle <= CurTime() then
+			if self.Owner:KeyDown(IN_ATTACK2) then
+				vm:SetPlaybackRate(math.Clamp(self.chargerate, 0, 1))
+				vm:SetSequence("attack_idle")
+			else
+				self.NextIdle = CurTime() + 0.8
+				self.IdlePlay = false
+				self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
+				self.Owner:ViewPunch(Angle(-1,2,2)*(1+self.chargerate))
+				self.beginattack = false
+				self:SetNextSecondaryFire(CurTime() + 0.7)
+				if SERVER then
+
+					local tr = util.TraceHull( {
+						start = self:GetOwner():GetShootPos(),
+						endpos = self:GetOwner():GetShootPos() + ( self:GetOwner():GetAimVector() * 100 ),
+						filter = self:GetOwner(),
+						mins = Vector( -10, -10, -10 ),
+						maxs = Vector( 10, 10, 10 ),
+						mask = MASK_SHOT_HULL
+					} )
+
+					local HitEntity = tr.Entity
+
+					if IsValid(HitEntity) then
+						self:EmitSound("shaky_flashlight_hit")
+					else
+						self:EmitSound("shaky_flashlight_swing")
+					end
+
+					local damageinfo = DamageInfo()
+
+					damageinfo:SetAttacker( self.Owner )
+					damageinfo:SetInflictor( self )
+					damageinfo:SetDamage( 50*(1+self.chargerate*2) )
+					damageinfo:SetDamageType( bit.bor( DMG_SLASH , DMG_NEVERGIB ) )
+					damageinfo:SetDamageForce(self.Owner:EyeAngles():Forward()*2555)
+					if IsValid(HitEntity) and HitEntity.DispatchTraceAttack then
+						HitEntity:DispatchTraceAttack( damageinfo, tr, self.Owner:GetAimVector() )
+					end
+				end
+			end
+		end
 	end
 
 end
