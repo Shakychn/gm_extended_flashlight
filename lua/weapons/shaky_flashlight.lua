@@ -261,7 +261,6 @@ function SWEP:Think()
 			self.chargerate = 0
 			self.multiplier = 30
 		end
-		print(self.chargerate)
 		self.multiplier = math.Approach(self.multiplier, 1, FrameTime()*4)
 		self.chargerate = math.Approach(self.chargerate, 1, FrameTime()/self.multiplier)
 
