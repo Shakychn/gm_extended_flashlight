@@ -294,10 +294,10 @@ function SWEP:Think()
 
 					local HitEntity = tr.Entity
 
-					if IsValid(HitEntity) then
-						self:EmitSound("shaky_flashlight_hit")
+					if IsValid(HitEntity) then -- for some reason in multiplayer it works only if use play it on the player, not the weapon ????
+						self.Owner:EmitSound("shaky_flashlight_hit")
 					else
-						self:EmitSound("shaky_flashlight_swing")
+						self.Owner:EmitSound("shaky_flashlight_swing")
 					end
 
 					local damageinfo = DamageInfo()
