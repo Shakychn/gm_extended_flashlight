@@ -7,7 +7,7 @@ SWEP.Purpose = "make u see things :)"
 SWEP.Instructions = 'LMB - Toggle light, RMB - attack (hold to charge), R - Cancel punch'
 
 SWEP.Slot = 0
-SWEP.SlotPos = 4
+SWEP.SlotPos = 5
 
 SWEP.Category = "Shaky"
 
@@ -32,11 +32,13 @@ SWEP.Secondary.Ammo = "none"
 
 SWEP.DrawAmmo = false
 
-SWEP.ViewModel	= "models/shaky/weapons/flashlight/c_flashlight.mdl"
-SWEP.WorldModel	= "models/shaky/weapons/flashlight/w_flashlight.mdl"
+SWEP.ViewModel	= Model("models/shaky/weapons/flashlight/c_flashlight.mdl")
+SWEP.WorldModel	= Model("models/shaky/weapons/flashlight/w_flashlight.mdl")
 if CLIENT then
 	SWEP.WepSelectIcon = surface.GetTextureID( "vgui/shaky_flashlight" )
 end
+
+SWEP.UseHands = true
 
 sound.Add( {
 	name = "shaky_flashlight_lean",
@@ -73,8 +75,6 @@ sound.Add( {
 	pitch = {100, 100},
 	sound = {"shaky_flashlight/hit.wav"}
 } )
-
-SWEP.UseHands = true
 
 function SWEP:Initialize()
 
@@ -175,7 +175,7 @@ function SWEP:Reload()
 		self.NextIdle = CurTime() + 1
 		self.IdlePlay = false
 		self:SendWeaponAnim(ACT_VM_RELEASE)
-		self:SetPlaybackRate(1)
+		self.Owner:GetViewModel():SetPlaybackRate(1)
 		self:SetNextSecondaryFire(CurTime() + 1)
 		self.beginattack = false
 	end
@@ -211,8 +211,8 @@ function SWEP:SecondaryAttack()
 		self.IsRunning = false
 		self.beginattack = true
 		self.startedcharging = false
+		self.Owner:GetViewModel():SetPlaybackRate(1)
 		self:SendWeaponAnim(ACT_VM_PICKUP)
-		self:SetPlaybackRate(1)
 	end
 end
 
@@ -242,6 +242,7 @@ function SWEP:Think()
 	end
 
 	local vm = self.Owner:GetViewModel()
+	vm:SetPlaybackRate(1)
 
 	if !self.beginattack then
 		if self.Owner:GetVelocity():Length2DSqr() > 4555 and ( self.NextIdle <= CurTime() or self.IdlePlay ) then
@@ -260,7 +261,7 @@ function SWEP:Think()
 	else
 		if !self.startedcharging and vm:GetSequenceName(vm:GetSequence()) == "attack_prepare" then
 			self.startedcharging = true
-			self:SetPlaybackRate(0)
+			vm:SetPlaybackRate(1)
 			self.chargerate = 0
 			self.multiplier = 30
 		end
@@ -276,6 +277,7 @@ function SWEP:Think()
 				self.NextIdle = CurTime() + 0.8
 				self.IdlePlay = false
 				self:SendWeaponAnim(ACT_VM_SECONDARYATTACK)
+				if SERVER then vm:ResetSequence("attack_finish") end -- "WHY??"
 				self.Owner:ViewPunch(Angle(-1,2,2)*(1+self.chargerate))
 				self.beginattack = false
 				self:SetNextSecondaryFire(CurTime() + 0.7)
@@ -334,7 +336,7 @@ local smoothtransition = 0
 
 local flashlightdraw = false
 
-function SWEP:ViewModelDrawn( vm )
+function SWEP:PostDrawViewModel( vm )
 
 	if !IsValid(self.light) then
 		self:CreateLight()
