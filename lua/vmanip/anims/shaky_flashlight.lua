@@ -146,6 +146,7 @@ local function Toggleflashlight(ply)
 		smoothtransition = 1
 		if VManip:PlayAnim("shaky_flashlight_deploy") then
 			flashlighting = true
+			VManip:GetVMGesture():EmitSound("shaky_flashlight_lean")
 			hook.Add("PostDrawOpaqueRenderables", "flashlightrenderlight", flashlightrenderlight)
 			hook.Add("VManipSegmentFinish","flashlightIdleAnim",flashlightIdleAnim)
 		end
