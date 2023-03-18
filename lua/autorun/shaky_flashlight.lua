@@ -11,6 +11,10 @@ CreateClientConVar( "shaky_flashlight_animatecamera", 1, true, false, "Animate c
 CreateClientConVar( "shaky_flashlight_lightfollowcenter", 0, true, false, "Make light be centered perfectly", 0, 1 )
 CreateClientConVar( "shaky_flashlight_animspeed", 35, true, false, "Light Texture Animation Speed", 0, 120 )
 
+CreateConVar("shaky_flashlight_enablepunch", 1, FCVAR_ARCHIVE, "enables ability to punch", 0, 1)
+CreateConVar("shaky_flashlight_damagemultiply", 1, FCVAR_ARCHIVE, "damage multiply", 0)
+CreateConVar("shaky_flashlight_chargespeedmultiply", 1, FCVAR_ARCHIVE, "charge speed", 0)
+
 CreateClientConVar( "shaky_flashlight_r", 255, true, false, "Light color R", 0, 255 )
 CreateClientConVar( "shaky_flashlight_g", 255, true, false, "Light color G", 0, 255 )
 CreateClientConVar( "shaky_flashlight_b", 255, true, false, "Light color B", 0, 255 )
@@ -101,7 +105,13 @@ if CLIENT then
 			panel:NumSlider( "Light AnimSpeed", "shaky_flashlight_animspeed", 0, 120 ):SetValue(GetConVar("shaky_flashlight_animspeed"):GetFloat())
 			panel:NumSlider( "Light Brightness", "shaky_flashlight_brightness", 0.1, 10):SetValue(GetConVar("shaky_flashlight_brightness"):GetFloat())	
 			panel:CheckBox( "Dynamic light", "shaky_flashlight_dynamiclight" ):SetValue(GetConVar("shaky_flashlight_dynamiclight"):GetBool())
-			panel:CheckBox( "Should follow center", "shaky_flashlight_lightfollowcenter" ):SetValue(GetConVar("shaky_flashlight_lightfollowcenter"):GetBool())	
+			panel:CheckBox( "Should follow center", "shaky_flashlight_lightfollowcenter" ):SetValue(GetConVar("shaky_flashlight_lightfollowcenter"):GetBool())
+
+			panel:Help("Server Settings")
+
+			panel:CheckBox( "Enable Punch", "shaky_flashlight_enablepunch" ):SetValue(GetConVar("shaky_flashlight_enablepunch"):GetBool())	
+			panel:NumSlider( "Charge Speed", "shaky_flashlight_chargespeedmultiply", 0, 10 ):SetValue(GetConVar("shaky_flashlight_chargespeedmultiply"):GetFloat())
+			panel:NumSlider( "Damage Multiply", "shaky_flashlight_damagemultiply", 0, 10 ):SetValue(GetConVar("shaky_flashlight_damagemultiply"):GetFloat())
 
 
 		end )

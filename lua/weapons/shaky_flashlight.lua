@@ -139,7 +139,7 @@ function SWEP:Deploy()
 		self:CreateLight()
 	end
 
-		timer.Create("createlight"..self:EntIndex(), 0.28, 1, function()
+		timer.Create("createlight"..self:EntIndex(), 0.35, 1, function()
 
 			self:EmitSound("shaky_flashlight/flashlight_toggle.wav", 45, math.Rand(90,110), 0.5, CHAN_WEAPON, 0, 0)
 			--timer.Create("FunnyEffectFlashlute", FrameTime()*math.Rand(1.3,1.8), 5, function()
@@ -175,6 +175,7 @@ function SWEP:Reload()
 		self.NextIdle = CurTime() + 1
 		self.IdlePlay = false
 		self:SendWeaponAnim(ACT_VM_RELEASE)
+		self:SetPlaybackRate(1)
 		self:SetNextSecondaryFire(CurTime() + 1)
 		self.beginattack = false
 	end
@@ -189,7 +190,7 @@ function SWEP:PrimaryAttack()
 	self:SetNextPrimaryFire(CurTime() + 1)
 	self:SetNextSecondaryFire(CurTime() + 1)
 
-	timer.Create("createlight"..self:EntIndex(), 0.28, 1, function()
+	timer.Create("createlight"..self:EntIndex(), 0.35, 1, function()
 
 		self:EmitSound("shaky_flashlight/flashlight_toggle.wav", 45, math.Rand(90,110), 0.5, CHAN_WEAPON, 0, 0)
 		--timer.Create("FunnyEffectFlashlute", FrameTime()*math.Rand(1.3,1.8), 5, function()
@@ -200,6 +201,7 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
+	if !GetConVar("shaky_flashlight_enablepunch"):GetBool() then return end
 	if game.SinglePlayer() then self:CallOnClient("SecondaryAttack") end
 	self:SetNextSecondaryFire(CurTime() + 1)
 	if !self.beginattack then
@@ -210,6 +212,7 @@ function SWEP:SecondaryAttack()
 		self.beginattack = true
 		self.startedcharging = false
 		self:SendWeaponAnim(ACT_VM_PICKUP)
+		self:SetPlaybackRate(1)
 	end
 end
 
@@ -262,11 +265,12 @@ function SWEP:Think()
 			self.multiplier = 30
 		end
 		self.multiplier = math.Approach(self.multiplier, 1, FrameTime()*4)
-		self.chargerate = math.Approach(self.chargerate, 1, FrameTime()/self.multiplier)
+
+		self.chargerate = math.Approach(self.chargerate, 1, (FrameTime()/self.multiplier)*GetConVar("shaky_flashlight_chargespeedmultiply"):GetFloat())
 
 		if self.NextIdle <= CurTime() then
 			if self.Owner:KeyDown(IN_ATTACK2) then
-				vm:SetPlaybackRate(math.Clamp(self.chargerate, 0, 1))
+				if CLIENT then vm:SetPlaybackRate(math.Clamp(self.chargerate, 0, 1)) end
 				vm:SetSequence("attack_idle")
 			else
 				self.NextIdle = CurTime() + 0.8
@@ -299,6 +303,7 @@ function SWEP:Think()
 					damageinfo:SetAttacker( self.Owner )
 					damageinfo:SetInflictor( self )
 					damageinfo:SetDamage( 50*(1+self.chargerate*2) )
+					damageinfo:ScaleDamage(GetConVar("shaky_flashlight_damagemultiply"):GetFloat())
 					damageinfo:SetDamageType( bit.bor( DMG_SLASH , DMG_NEVERGIB ) )
 					damageinfo:SetDamageForce(self.Owner:EyeAngles():Forward()*2555)
 					if IsValid(HitEntity) and HitEntity.DispatchTraceAttack then
