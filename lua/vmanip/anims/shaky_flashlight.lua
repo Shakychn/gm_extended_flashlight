@@ -20,6 +20,11 @@ VManip:RegisterAnim("shaky_flashlight_deploy",
 )
 
 local flashlighting = false
+local flicknext = 0
+local nextupdate = 0 -- i dont know why but cvars.AddChangeCallback doesn't fucking work
+local addangle = Vector(3,-6,0)
+local smoothtransition = 0
+local lightsaveremove = NULL -- for save removing light after somehos vm will be gone
 
 local function flashlightIdleAnim(name,cursegment,islast)
 	if flashlighting then
@@ -33,6 +38,8 @@ function CreateLight(vm)
 	if CLIENT then
 		local light = ProjectedTexture()
 		self.light = light
+
+		lightsaveremove = light
 
 		light:SetTexture( GetConVar("shaky_flashlight_material"):GetString() )
 
@@ -63,16 +70,13 @@ function RefreshLight(vm)
 
 end
 
-local flicknext = 0
-local nextupdate = 0 -- i dont know why but cvars.AddChangeCallback doesn't fucking work
-local addangle = Vector(3,-6,0)
-local smoothtransition = 0
-
 local function flashlightrenderlight()
 
 	local vm = VManip:GetVMGesture()
 
 	local self = vm
+
+	if !IsValid(vm) then if IsValid(lightsaveremove) then lightsaveremove:Remove() end return end
 
 	if !IsValid(vm.light) then
 		CreateLight(vm)

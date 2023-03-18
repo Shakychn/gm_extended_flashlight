@@ -307,7 +307,7 @@ function SWEP:Think()
 					damageinfo:SetDamage( 50*(1+self.chargerate*2) )
 					damageinfo:ScaleDamage(GetConVar("shaky_flashlight_damagemultiply"):GetFloat())
 					damageinfo:SetDamageType( bit.bor( DMG_SLASH , DMG_NEVERGIB ) )
-					damageinfo:SetDamageForce(self.Owner:EyeAngles():Forward()*2555)
+					damageinfo:SetDamageForce(self.Owner:EyeAngles():Forward()*15)
 					if IsValid(HitEntity) and HitEntity.DispatchTraceAttack then
 						HitEntity:DispatchTraceAttack( damageinfo, tr, self.Owner:GetAimVector() )
 					end
