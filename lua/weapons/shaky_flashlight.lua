@@ -365,7 +365,11 @@ function SWEP:PostDrawViewModel( vm )
 	end
 	lightattachment.Ang:RotateAroundAxis(lightattachment.Ang:Right(), addangle.y)
 	lightattachment.Ang:RotateAroundAxis(-lightattachment.Ang:Up(), addangle.x)
-	self.light:SetPos(lightattachment.Pos)
+	local lightpos = lightattachment.Pos
+	if GetConVar("shaky_flashlight_lightorigincenter"):GetBool() then
+		lightpos = EyePos()
+	end
+	self.light:SetPos(lightpos)
 	if GetConVar("shaky_flashlight_lightfollowcenter"):GetBool() then
 		local seqname = vm:GetSequenceName(vm:GetSequence())
 		if (seqname == "equip" or seqname == "onoff") and vm:GetCycle() <= 0.85 then

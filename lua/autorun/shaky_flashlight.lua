@@ -9,6 +9,7 @@ CreateClientConVar( "shaky_flashlight_flickintervalmax", 45, true, false, "flick
 CreateClientConVar( "shaky_flashlight_flicksize", 0.8, true, false, "how strong the light should flick", 0, 1 )
 CreateClientConVar( "shaky_flashlight_animatecamera", 1, true, false, "Animate camera movement", 0, 1 )
 CreateClientConVar( "shaky_flashlight_lightfollowcenter", 0, true, false, "Make light be centered perfectly", 0, 1 )
+CreateClientConVar( "shaky_flashlight_lightorigincenter", 0, true, false, "Make lights origin be centered perfectly", 0, 1 )
 CreateClientConVar( "shaky_flashlight_animspeed", 35, true, false, "Light Texture Animation Speed", 0, 120 )
 
 CreateConVar("shaky_flashlight_enablepunch", 1, FCVAR_ARCHIVE, "enables ability to punch", 0, 1)
@@ -106,6 +107,7 @@ if CLIENT then
 			panel:NumSlider( "Light Brightness", "shaky_flashlight_brightness", 0.1, 10):SetValue(GetConVar("shaky_flashlight_brightness"):GetFloat())	
 			panel:CheckBox( "Dynamic light", "shaky_flashlight_dynamiclight" ):SetValue(GetConVar("shaky_flashlight_dynamiclight"):GetBool())
 			panel:CheckBox( "Should follow center", "shaky_flashlight_lightfollowcenter" ):SetValue(GetConVar("shaky_flashlight_lightfollowcenter"):GetBool())
+			panel:CheckBox( "Center light origin", "shaky_flashlight_lightorigincenter" ):SetValue(GetConVar("shaky_flashlight_lightorigincenter"):GetBool())
 
 			panel:Help("Server Settings")
 

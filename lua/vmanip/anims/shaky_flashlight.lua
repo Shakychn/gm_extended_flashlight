@@ -108,7 +108,13 @@ local function flashlightrenderlight()
 	end
 	lightattachment.Ang:RotateAroundAxis(lightattachment.Ang:Right(), addangle.y)
 	lightattachment.Ang:RotateAroundAxis(-lightattachment.Ang:Up(), addangle.x)
-	self.light:SetPos(lightattachment.Pos)
+	local lightpos = lightattachment.Pos
+	if GetConVar("shaky_flashlight_lightorigincenter"):GetBool() then
+		lightpos = LocalPlayer():GetShootPos()
+	else
+		lightpos = lightpos + lightattachment.Ang:Forward()*-3 + lightattachment.Ang:Up()*-1  + lightattachment.Ang:Right()*1.5
+	end
+	self.light:SetPos(lightpos)
 	if GetConVar("shaky_flashlight_lightfollowcenter"):GetBool() then
 		local seqname = vm:GetSequenceName(vm:GetSequence())
 		if seqname != "shaky_flashlight_idle" and vm:GetCycle() <= 0.3 then
